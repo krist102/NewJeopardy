@@ -27,7 +27,7 @@ public class JClientHandler implements Runnable
 	{
 		this.connectionSock = sock;
 		this.socksAndNames = socksAndNames;	// Keep reference to master list
-        state = 0;
+        state = 1;
 	}
 
 	public void run()
@@ -44,41 +44,50 @@ public class JClientHandler implements Runnable
 
 			while (true)
 			{
-                    // Get data sent from a client
-                    DataOutputStream question_output = new DataOutputStream(connectionSock.getOutputStream());
-                    question_output.writeBytes("Question 1: What is the air speed of a unladen swallow?");
+                DataOutputStream question_output;
+                switch(state){
+                    case 1:
+                        question_output = new DataOutputStream(connectionSock.getOutputStream());
+                        question_output.writeBytes("Question 1: What is the air speed of a unladen swallow?");
+                        break;
+                    default:
+                        break;
+                }
 
-                    String clientText = clientInput.readLine();
-                    if (clientText != null)
+                String clientText = clientInput.readLine();
+                if (clientText.equals("_answered" + this.state.toString())){
+                    state++;
+                }
+                else if (clientText != null)
+                {
+                    System.out.println("Received: " + clientText);
+                  //gets name of client at that connectionSock
+                  for (socketAndName s: socksAndNames){
+                    if (s.socket == connectionSock)
+                      clientText  = s.name + ": "+ clientText; //appends name to front of message
+                  }
+
+                    // Turn around and output this data
+                    // to all other clients except the one
+                    // that sent us this information
+                    for (socketAndName s : socksAndNames)
                     {
-                        System.out.println("Received: " + clientText);
-                      //gets name of client at that connectionSock
-                      for (socketAndName s: socksAndNames){
-                        if (s.socket == connectionSock)
-                          clientText  = s.name + ": "+ clientText; //appends name to front of message
-                      }
-
-                        // Turn around and output this data
-                        // to all other clients except the one
-                        // that sent us this information
-                        for (socketAndName s : socksAndNames)
+                        if (s.socket != connectionSock)
                         {
-                            if (s.socket != connectionSock)
-                            {
-                                DataOutputStream clientOutput = new DataOutputStream(s.socket.getOutputStream());
-                                clientOutput.writeBytes("_answered");
-                            }
+                            DataOutputStream clientOutput = new DataOutputStream(s.socket.getOutputStream());
+                            clientOutput.writeBytes("_answered" + this.state.toString());
                         }
                     }
-                    else
-                    {
-                      // Connection was lost
-                      System.out.println("Closing connection for socket " + connectionSock);
-                       // Remove from arraylist
-                       socksAndNames.remove(connectionSock);
-                       connectionSock.close();
-                       break;
-                    }
+                }
+                else
+                {
+                  // Connection was lost
+                  System.out.println("Closing connection for socket " + connectionSock);
+                   // Remove from arraylist
+                   socksAndNames.remove(connectionSock);
+                   connectionSock.close();
+                   break;
+                }
 			}
 		}
 		catch (Exception e)
