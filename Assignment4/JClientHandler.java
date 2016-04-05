@@ -44,47 +44,40 @@ public class JClientHandler implements Runnable
 
 			while (true)
 			{
-                switch(state){
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        break;
-                }
-                /*
-                                                                    // Get data sent from a client
-                                                                    String clientText = clientInput.readLine();
-                                                                    if (clientText != null)
-                                                                    {
-                                                                        System.out.println("Received: " + clientText);
-                                                              //gets name of client at that connectionSock
-                                                              for (socketAndName s: socksAndNames){
-                                                                if (s.socket == connectionSock)
-                                                                  clientText  = s.name +": "+ clientText; //appends name to front of message
-                                                              }
+                    // Get data sent from a client
+                    DataOutputStream question_output = new DataOutputStream(connectionSock.getOutputStream());
+                    question_output.writeBytes("Question 1: What is the air speed of a un-latent swallow?");
+                    String clientText = clientInput.readLine();
+                    if (clientText != null)
+                    {
+                        System.out.println("Received: " + clientText);
+                      //gets name of client at that connectionSock
+                      for (socketAndName s: socksAndNames){
+                        if (s.socket == connectionSock)
+                          clientText  = s.name + ": "+ clientText; //appends name to front of message
+                      }
 
-                                                                        // Turn around and output this data
-                                                                        // to all other clients except the one
-                                                                        // that sent us this information
-                                                                        for (socketAndName s : socksAndNames)
-                                                                        {
-                                                                            if (s.socket != connectionSock)
-                                                                            {
-                                                                                DataOutputStream clientOutput = new DataOutputStream(s.socket.getOutputStream());
-                                                                                clientOutput.writeBytes(clientText + "\n");
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                      // Connection was lost
-                                                                      System.out.println("Closing connection for socket " + connectionSock);
-                                                                       // Remove from arraylist
-                                                                       socksAndNames.remove(connectionSock);
-                                                                       connectionSock.close();
-                                                                       break;
-                                                                    }*/
+                        // Turn around and output this data
+                        // to all other clients except the one
+                        // that sent us this information
+                        for (socketAndName s : socksAndNames)
+                        {
+                            if (s.socket != connectionSock)
+                            {
+                                DataOutputStream clientOutput = new DataOutputStream(s.socket.getOutputStream());
+                                clientOutput.writeBytes("_answered");
+                            }
+                        }
+                    }
+                    else
+                    {
+                      // Connection was lost
+                      System.out.println("Closing connection for socket " + connectionSock);
+                       // Remove from arraylist
+                       socksAndNames.remove(connectionSock);
+                       connectionSock.close();
+                       break;
+                    }
 			}
 		}
 		catch (Exception e)
