@@ -21,6 +21,7 @@ public class JClientHandler implements Runnable
 {
 	private Socket connectionSock = null;
 	private ArrayList<socketAndName> socksAndNames;
+	private ArrayList<JClientHandler> handlers;
 	private String _senderName;
 	public int state;
 	private String message;
@@ -31,15 +32,20 @@ public class JClientHandler implements Runnable
 		this.socksAndNames = socksAndNames;	// Keep reference to master list
 	}
 
-	public synchronized void setState(int fromServer){
-		state = fromServer;
-		notify();
+	public synchronized void setState(int s){
+		state = s;
+		notify();//wakes up the thread
 	}
 	public void setMessage(String msg){
 		message = msg;
 	}
+	private int getState(){return state;}
 
 	public String getName(){return _senderName;}
+
+	public void setHandlers(ArrayList<JClientHandler> h){
+		handlers = h;
+	}
 
 
 
@@ -61,32 +67,35 @@ public class JClientHandler implements Runnable
 			}
 
 
-			while (state<3)
+			while (state<=3)
 			{
-				System.out.println(state);
-				switch (state){
-					case 0:
-						System.out.println("BBBBB"+state);
-								DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
+				DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
+					if (state == 0){
 								clientOutput.writeBytes("Please wait for other users to connect." + "\n");
 
 						wait();
-						break;
-					case 1:
-						System.out.println("AAAA" +state);
+					}
+					else if (state == 1){
 
-						clientOutput = new DataOutputStream(connectionSock.getOutputStream());
 						clientOutput.writeBytes("Press [enter] to buzz in: "+"\n");
 						clientOutput.writeBytes(message+"\n");
 						clientInput.readLine();
+						if (this.getState() ==1)
+							state = 2;
+					}
+					else if (state ==2){ //this handler buzzed in
+
+						for (JClientHandler h : handlers){
+							if (h!=this){
+								h.state = 3;
+							}
+						}
 						System.out.println(_senderName + " buzzed in first.");
-						state = 2;
-						notifyAll();
-						break;
-					case 2: //this handler buzzed in
-						wait(); //add stuff here later
-						break;
-				}
+						wait(); //quit program
+					}
+					else if (state == 3){
+						wait();
+					}
 			}
 
 				  // Connection was lost

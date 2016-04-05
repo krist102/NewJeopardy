@@ -107,9 +107,10 @@ public class JServer
 	private synchronized void askQustion(){
 		for (JClientHandler h : handlers){
 			h.setState(1);
-			//notifyAll();
-			System.out.println("HERE");
+			h.setHandlers(handlers);
 			h.setMessage("The process for establishing a TCP connection.");
+			//wait for response
+			//ClientHandler will print out who buzzes in first
 		}
 	}
 
@@ -118,7 +119,6 @@ public class JServer
 		JServer server = new JServer();
 		server.getConnection();
 		server.printConnections();
-
 		server.askQustion();
 	}
 } // JServer
