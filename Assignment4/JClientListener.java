@@ -35,7 +35,11 @@ public class JClientListener implements Runnable
 			{
 				// Get data sent from the server
 				String serverText = serverInput.readLine();
-				if (serverInput != null)
+                if(serverText.substring(0,5).equals("_answ")){
+                    DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
+                    clientOutput.writeBytes(serverText);
+                }
+				else if (serverInput != null)
 				{
 					System.out.println(serverText);
 				}
