@@ -46,7 +46,8 @@ public class JClientHandler implements Runnable
 			{
                     // Get data sent from a client
                     DataOutputStream question_output = new DataOutputStream(connectionSock.getOutputStream());
-                    question_output.writeBytes("Question 1: What is the air speed of a un-latent swallow?");
+                    question_output.writeBytes("Question 1: What is the air speed of a unladen swallow?");
+
                     String clientText = clientInput.readLine();
                     if (clientText != null)
                     {
