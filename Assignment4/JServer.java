@@ -34,11 +34,13 @@ public class JServer
 	private ArrayList<socketAndName> socksAndNames; //will also store the names of all the clients
 	private int clientNum;
 	private ArrayList<JClientHandler> handlers;
+	//private ArrayList<Thread> threads;
 
 	public JServer()
 	{
 		socksAndNames = new ArrayList<socketAndName>();
 		handlers= new ArrayList<JClientHandler>();
+		//threads= new ArrayList<Thread>();
 	}
 
 	private void getConnection()
@@ -82,6 +84,7 @@ public class JServer
 				JClientHandler handler = new JClientHandler(connectionSock, this.socksAndNames);
 				handlers.add(handler);
 				Thread theThread = new Thread(handler);
+				//threads.add(theThread);
 				theThread.start();
 			}
 
@@ -101,9 +104,10 @@ public class JServer
 			System.out.println("\tName: "+s.name+" was at socket: "+s.socket);
 		}
 	}
-	private void askQustion(){
+	private synchronized void askQustion(){
 		for (JClientHandler h : handlers){
 			h.setState(1);
+			//notifyAll();
 			System.out.println("HERE");
 			h.setMessage("The process for establishing a TCP connection.");
 		}

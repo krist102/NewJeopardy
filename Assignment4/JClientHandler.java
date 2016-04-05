@@ -22,7 +22,7 @@ public class JClientHandler implements Runnable
 	private Socket connectionSock = null;
 	private ArrayList<socketAndName> socksAndNames;
 	private String _senderName;
-	private int state;
+	public int state;
 	private String message;
 
 	JClientHandler(Socket sock, ArrayList<socketAndName> socksAndNames)
@@ -31,8 +31,9 @@ public class JClientHandler implements Runnable
 		this.socksAndNames = socksAndNames;	// Keep reference to master list
 	}
 
-	public void setState(int fromServer){
+	public synchronized void setState(int fromServer){
 		state = fromServer;
+		notify();
 	}
 	public void setMessage(String msg){
 		message = msg;
@@ -52,6 +53,12 @@ public class JClientHandler implements Runnable
 			BufferedReader clientInput = new BufferedReader(
 				new InputStreamReader(connectionSock.getInputStream()));
 
+			//gets name from socket
+			for (socketAndName s: socksAndNames){
+				if (s.socket == connectionSock){
+					_senderName = s.name;
+				}
+			}
 
 
 			while (state<3)
@@ -59,63 +66,34 @@ public class JClientHandler implements Runnable
 				System.out.println(state);
 				switch (state){
 					case 0:
-
+						System.out.println("BBBBB"+state);
 								DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
 								clientOutput.writeBytes("Please wait for other users to connect." + "\n");
 
 						wait();
 						break;
 					case 1:
+						System.out.println("AAAA" +state);
+
 						clientOutput = new DataOutputStream(connectionSock.getOutputStream());
-						clientOutput.writeBytes(message);
-						System.out.print("Press [enter] to buzz in: ");
+						clientOutput.writeBytes("Press [enter] to buzz in: "+"\n");
+						clientOutput.writeBytes(message+"\n");
 						clientInput.readLine();
 						System.out.println(_senderName + " buzzed in first.");
 						state = 2;
+						notifyAll();
 						break;
 					case 2: //this handler buzzed in
 						wait(); //add stuff here later
 						break;
 				}
-
-				//version 1 BELOW
-				// // Get data sent from a client
-				// String clientText = clientInput.readLine();
-				// if (clientText != null)
-				// {
-				//
-        //   //gets name of client at that connectionSock
-        //   for (socketAndName s: socksAndNames){
-        //     if (s.socket == connectionSock){
-        //       clientText  = s.name +": "+ clientText; //appends name to front of message
-				// 			_senderName = s.name;
-				// 		}
-				// 	System.out.println("Received from "+_senderName+": " + clientText);
-				// 	}
-				//
-				// 	// Turn around and output this data
-				// 	// to all other clients except the one
-				// 	// that sent us this information
-					// for (socketAndName s : socksAndNames)
-					// {
-					// 	if (s.socket != connectionSock)
-					// 	{
-					// 		DataOutputStream clientOutput = new DataOutputStream(s.socket.getOutputStream());
-					// 		clientOutput.writeBytes(clientText + "\n");
-					// 	}
-					// }
-
-
-
+			}
 
 				  // Connection was lost
 				  System.out.println("Closing connection for socket " + connectionSock);
 				   // Remove from arraylist
 				   socksAndNames.remove(connectionSock);
 				   connectionSock.close();
-				   break;
-
-			}
 		}
 		catch (Exception e)
 		{
