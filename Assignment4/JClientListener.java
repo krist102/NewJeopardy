@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class JClientListener implements Runnable
 {
 	private Socket connectionSock = null;
+	public int state = 0;
 
 	JClientListener(Socket sock)
 	{
@@ -30,19 +31,22 @@ public class JClientListener implements Runnable
        		 // Wait for data from the server.  If received, output it.
 		try
 		{
-            InputStreamReader reader = new InputStreamReader(System.in);
-            BufferedReader in = new BufferedReader(reader);
 			BufferedReader serverInput = new BufferedReader(new InputStreamReader(connectionSock.getInputStream()));
-            DataOutputStream clientOutput = new DataOutputStream(this.connectionSock.getOutputStream());
 			while (true)
 			{
 				// Get data sent from the server
 				String serverText = serverInput.readLine();
-                if(serverText.substring(0,5).equals("_answ")){
-                    clientOutput.writeBytes(serverText);
-                }
-                String name = in.readLine();
-				clientOutput.writeBytes(name + "\n");
+				if (serverInput != null)
+				{
+					System.out.println(serverText);
+				}
+				else
+				{
+					// Connection was lost
+					System.out.println("Closing connection for socket " + connectionSock);
+					connectionSock.close();
+					break;
+				}
 			}
 		}
 		catch (Exception e)

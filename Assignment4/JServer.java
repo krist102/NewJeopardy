@@ -1,7 +1,7 @@
 /**
  * JServer.java
  *
- *Authors: Tim Kristedja & Austin Ayers 
+ *Authors: Tim Kristedja & Austin Ayers
  *@version: 1
  *
  *
@@ -33,10 +33,12 @@ public class JServer
 	// Maintain list of all client sockets for broadcast
 	private ArrayList<socketAndName> socksAndNames; //will also store the names of all the clients
 	private int clientNum;
+	private ArrayList<JClientHandler> handlers;
 
 	public JServer()
 	{
 		socksAndNames = new ArrayList<socketAndName>();
+		handlers= new ArrayList<JClientHandler>();
 	}
 
 	private void getConnection()
@@ -55,6 +57,7 @@ public class JServer
 
 				//replies to the new connection their client number
 				clientNum++;
+				if (clientNum >= 3){serverSock.close();}
 				DataOutputStream firstReplyToClient = new DataOutputStream(connectionSock.getOutputStream());
 				String reply = "You are the "+clientNum;
 				switch(clientNum) {
@@ -75,15 +78,15 @@ public class JServer
 
 				// Add this socketAndName to the list
 				socksAndNames.add(new socketAndName(connectionSock,name));
-			}
-            for (socketAndName s : socksAndNames)
-					{
-                        JClientHandler handler = new JClientHandler(s.socket, this.socksAndNames);
-			            Thread theThread = new Thread(handler);
-			            theThread.start();
-					}
 
-			serverSock.close();
+				JClientHandler handler = new JClientHandler(connectionSock, this.socksAndNames);
+				handlers.add(handler);
+				Thread theThread = new Thread(handler);
+				theThread.start();
+			}
+
+
+
 		}
 		catch (IOException e)
 		{
@@ -98,11 +101,17 @@ public class JServer
 			System.out.println("\tName: "+s.name+" was at socket: "+s.socket);
 		}
 	}
+	private void askQustion(){
+		//send question to handlers and
+		//set state
+	}
 
 	public static void main(String[] args)
 	{
 		JServer server = new JServer();
 		server.getConnection();
 		server.printConnections();
+
+		server.askQustion();
 	}
 } // JServer

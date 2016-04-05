@@ -55,9 +55,21 @@ public class JClient
 			Thread theThread = new Thread(listener);
 			theThread.start();
 
+			// while (listener.state < 3){
+			// 	switch (listener.state){
+			// 		case 0:
+			//
+			//
+			// 	}
+			// }
 			// Read input from the keyboard and send it to everyone else.
 			// The only way to quit is to hit control-c, but a quit command
 			// could easily be added.
+			while (true)
+			{
+				String data = keyboard.nextLine();
+				serverOutput.writeBytes(data + "\n");
+			}
 		}
 		catch (IOException e)
 		{
