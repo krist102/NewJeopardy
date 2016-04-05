@@ -2,7 +2,7 @@
  * JServer.java
  *
  *Authors: Tim Kristedja & Austin Ayers
- *@version: 1
+ *@version: 2
  *
  *
  *
@@ -19,6 +19,7 @@
  *
  * This program also tells clients their number in which they connect and stores their names
  *
+ *Also asks a question
  */
 import java.net.ServerSocket;
 import java.net.Socket;

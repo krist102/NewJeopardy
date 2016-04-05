@@ -2,11 +2,13 @@
  * JClientHandler.java
  *
  *Authors: Tim Kristedja & Austin Ayers
- *@version: 1
+ *@version: 2
  *
  * This class handles communication between the client
  * and the server.  It runs in a separate thread but has a
  * link to a common list of sockets to handle broadcast.
+ *
+ * it keeps track of its name and who buzzed in
  */
 
 import java.net.Socket;

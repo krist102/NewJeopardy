@@ -2,7 +2,7 @@
  * ClientListener.java
  *
  *Authors: Tim Kristedja & Austin Ayers
- *@version: 1
+ *@version: 2
  *
  * This class runs on the client end and just
  * displays any text received from the server.

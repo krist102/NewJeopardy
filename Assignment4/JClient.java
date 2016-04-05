@@ -2,7 +2,7 @@
  * JClient.java
  *
  *Authors: Tim Kristedja & Austin Ayers
- *@version: 1
+ *@version: 2
  *
  * This program implements a simple multithreaded chat client.  It connects to the
  * server (assumed to be localhost on port 7654) and starts two threads:
