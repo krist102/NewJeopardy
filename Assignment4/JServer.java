@@ -102,8 +102,11 @@ public class JServer
 		}
 	}
 	private void askQustion(){
-		//send question to handlers and
-		//set state
+		for (JClientHandler h : handlers){
+			h.setState(1);
+			System.out.println("HERE");
+			h.setMessage("The process for establishing a TCP connection.");
+		}
 	}
 
 	public static void main(String[] args)
