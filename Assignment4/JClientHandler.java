@@ -47,36 +47,30 @@ public class JClientHandler implements Runnable
                 DataOutputStream question_output;
                 switch(state){
                     case 1:
-                        question_output = new DataOutputStream(connectionSock.getOutputStream());
+                        question_output = new DataOutputStream(this.connectionSock.getOutputStream());
                         question_output.writeBytes("Question 1: What is the air speed of a unladen swallow?");
+                        break;
+                    case 2:
+                        question_output = new DataOutputStream(this.connectionSock.getOutputStream());
+                        question_output.writeBytes("Got to Question 2!");
                         break;
                     default:
                         break;
                 }
 
                 String clientText = clientInput.readLine();
-                if (clientText.equals("_answered" + this.state.toString())){
+                if (clientText.equals("_answered" + this.state)){
                     state++;
                 }
                 else if (clientText != null)
                 {
                     System.out.println("Received: " + clientText);
-                  //gets name of client at that connectionSock
-                  for (socketAndName s: socksAndNames){
-                    if (s.socket == connectionSock)
-                      clientText  = s.name + ": "+ clientText; //appends name to front of message
-                  }
 
-                    // Turn around and output this data
-                    // to all other clients except the one
-                    // that sent us this information
                     for (socketAndName s : socksAndNames)
                     {
-                        if (s.socket != connectionSock)
-                        {
-                            DataOutputStream clientOutput = new DataOutputStream(s.socket.getOutputStream());
-                            clientOutput.writeBytes("_answered" + this.state.toString());
-                        }
+                        DataOutputStream clientOutput = new DataOutputStream(s.socket.getOutputStream());
+                        clientOutput.writeBytes("_answered" + this.state);
+
                     }
                 }
                 else

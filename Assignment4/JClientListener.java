@@ -30,26 +30,19 @@ public class JClientListener implements Runnable
        		 // Wait for data from the server.  If received, output it.
 		try
 		{
+            InputStreamReader reader = new InputStreamReader(System.in);
+            BufferedReader in = new BufferedReader(reader);
 			BufferedReader serverInput = new BufferedReader(new InputStreamReader(connectionSock.getInputStream()));
+            DataOutputStream clientOutput = new DataOutputStream(this.connectionSock.getOutputStream());
 			while (true)
 			{
 				// Get data sent from the server
 				String serverText = serverInput.readLine();
                 if(serverText.substring(0,5).equals("_answ")){
-                    DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
                     clientOutput.writeBytes(serverText);
                 }
-				else if (serverInput != null)
-				{
-					System.out.println(serverText);
-				}
-				else
-				{
-					// Connection was lost
-					System.out.println("Closing connection for socket " + connectionSock);
-					connectionSock.close();
-					break;
-				}
+                String name = in.readLine();
+				clientOutput.writeBytes(name + "\n");
 			}
 		}
 		catch (Exception e)
