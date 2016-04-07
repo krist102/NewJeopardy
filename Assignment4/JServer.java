@@ -105,21 +105,27 @@ public class JServer
 			System.out.println("\tName: "+s.name+" was at socket: "+s.socket);
 		}
 	}
-	private synchronized void askQustion(){
+	private synchronized void askQustion(String question){
 		for (JClientHandler h : handlers){
 			h.setState(1);
 			h.setHandlers(handlers);
-			h.setMessage("The process for establishing a TCP connection.");
+			h.setMessage(question);
 			//wait for response
 			//ClientHandler will print out who buzzes in first
 		}
 	}
+    private synchronized void setAnswer(String answer){
+        for (JClientHandler h : handlers){
+			h.setAnswer(answer);
+		}
+    }
 
 	public static void main(String[] args)
 	{
 		JServer server = new JServer();
 		server.getConnection();
 		server.printConnections();
-		server.askQustion();
+        server.setAnswer("What is the Three Way Handshake?");
+		server.askQustion("The process for establishing a TCP connection.");
 	}
 } // JServer

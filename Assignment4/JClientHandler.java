@@ -26,21 +26,29 @@ public class JClientHandler implements Runnable
 	private ArrayList<JClientHandler> handlers;
 	private String _senderName;
 	public int state;
-	private String message;
+	private String message, answer, right_answer;
 
 	JClientHandler(Socket sock, ArrayList<socketAndName> socksAndNames)
 	{
 		this.connectionSock = sock;
 		this.socksAndNames = socksAndNames;	// Keep reference to master list
+        this.state = 0;
 	}
 
 	public synchronized void setState(int s){
 		state = s;
 		notify();//wakes up the thread
 	}
+    public synchronized void setAnswer(String answer){
+		this.right_answer = answer;
+		notify();//wakes up the thread
+	}
 	public void setMessage(String msg){
 		message = msg;
 	}
+    public boolean checkAnswer(){
+        return this.answer.equals(this.right_answer);
+    }
 	private int getState(){return state;}
 
 	public String getName(){return _senderName;}
@@ -67,34 +75,49 @@ public class JClientHandler implements Runnable
 					_senderName = s.name;
 				}
 			}
-
-
-			while (state<=3)
+            DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
+			while (state<=10)
 			{
-				DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
 					if (state == 0){
-								clientOutput.writeBytes("Please wait for other users to connect." + "\n");
-
+						clientOutput.writeBytes("Please wait for other users to connect." + "\n");
 						wait();
 					}
 					else if (state == 1){
 
 						clientOutput.writeBytes("Press [enter] to buzz in: "+"\n");
-						clientOutput.writeBytes(message+"\n");
+						clientOutput.writeBytes(message + "\n");
 						clientInput.readLine();
-						if (this.getState() ==1)
+						if (this.getState() == 1)
 							state = 2;
 					}
-					else if (state ==2){ //this handler buzzed in
-
+					else if (state == 2){
 						for (JClientHandler h : handlers){
 							if (h!=this){
+                                clientOutput.writeBytes("Someone else buzzed in first.");
+                                System.out.println("Someone else buzzed in first.");
+                                clientOutput.writeBytes(this._senderName + " is typing an answer, please wait... (And hope that they're wrong)");
+                                System.out.println(this._senderName + " is typing an answer, please wait... (And hope that they're wrong)");
 								h.state = 3;
 							}
 						}
-						System.out.println(_senderName + " buzzed in first.");
-						wait(); //quit program
-					}
+                        clientOutput.writeBytes("Please enter a correct question: ");
+                        System.out.println("Please enter a correct question: ");
+                        this.answer = clientInput.readLine();
+                        if(this.checkAnswer()){
+                            for (JClientHandler h : handlers){
+							    clientOutput.writeBytes("The question was answered correctly!");
+                                System.out.println("The question was answered correctly!");
+                            }
+						}
+
+                        else{
+                            for (JClientHandler h : handlers){
+							    clientOutput.writeBytes("The question was NOT answered correctly!");
+                                System.out.println("The question was NOT answered correctly!");
+						    }
+                        }
+                        wait();
+                    }
 					else if (state == 3){
 						wait();
 					}
