@@ -18,8 +18,9 @@ import java.util.ArrayList;
 
 public class JClientListener implements Runnable
 {
+	int c_state;
+
 	private Socket connectionSock = null;
-	public int state = 0;
 
 	JClientListener(Socket sock)
 	{
@@ -36,7 +37,11 @@ public class JClientListener implements Runnable
 			{
 				// Get data sent from the server
 				String serverText = serverInput.readLine();
-				if (serverInput != null)
+				if (serverText.substring(2).equals("ENTERSTATE")){ //enter state msg will look like '01ENTERSTATE' to enter state 1
+					String c_state_str = serverText.substring(0,2);
+					c_state = Integer.parseInt(c_state_str);
+				}
+				else if (serverInput != null)
 				{
 					System.out.println(serverText);
 				}

@@ -105,6 +105,13 @@ public class JServer
 			System.out.println("\tName: "+s.name+" was at socket: "+s.socket);
 		}
 	}
+	//prints the ArrayList after all 3 clients connect to the server
+	private void printHandlers(){
+		System.out.println("Handlers will print below.");
+		for (JClientHandler h : handlers){
+			System.out.println(h);
+		}
+	}
 	private synchronized void askQustion(String question){
 		for (JClientHandler h : handlers){
 			h.setState(1);
@@ -125,7 +132,7 @@ public class JServer
 		JServer server = new JServer();
 		server.getConnection();
 		server.printConnections();
-        server.setAnswer("What is the Three Way Handshake?");
+    server.setAnswer("What is the Three Way Handshake?");
 		server.askQustion("The process for establishing a TCP connection.");
 	}
 } // JServer

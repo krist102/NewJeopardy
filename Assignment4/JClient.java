@@ -37,6 +37,7 @@ public class JClient
 		Scanner keyboard = new Scanner(System.in);
 		String name = keyboard.nextLine();
 
+
 		try
 		{
 			String hostname = "localhost";
@@ -62,13 +63,25 @@ public class JClient
 			//
 			// 	}
 			// }
+
 			// Read input from the keyboard and send it to everyone else.
 			// The only way to quit is to hit control-c, but a quit command
 			// could easily be added.
-			while (true)
+			// String data = keyboard.nextLine();
+			// serverOutput.writeBytes(data + "\n");
+
+			while (listener.c_state<=10)
 			{
-				String data = keyboard.nextLine();
-				serverOutput.writeBytes(data + "\n");
+				switch (listener.c_state){
+					case 0://wait
+						//do nothing, do not ask for input
+						break;
+					case 1://type stuff
+						String data = keyboard.nextLine();
+						serverOutput.writeBytes(data + "\n");
+						break;
+				}
+
 			}
 		}
 		catch (IOException e)
