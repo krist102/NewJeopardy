@@ -146,6 +146,7 @@ public class JClientHandler implements Runnable
 					else if (state == 3){
 						wait();
 					}
+                    
 			}
 
 				  // Connection was lost
