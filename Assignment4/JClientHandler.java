@@ -26,6 +26,7 @@ public class JClientHandler implements Runnable
 	private ArrayList<JClientHandler> handlers;
 	private String _senderName;
 	public int state;
+	public int score, questionVal;
 	private String message, answer, right_answer;
 
 	JClientHandler(Socket sock, ArrayList<socketAndName> socksAndNames)
@@ -47,7 +48,7 @@ public class JClientHandler implements Runnable
 		message = msg;
 	}
     public boolean checkAnswer(){
-        return this.answer.equals(this.right_answer);
+        return this.answer.equalsIgnoreCase(this.right_answer);
     }
 	private int getState(){return state;}
 
@@ -79,7 +80,7 @@ public class JClientHandler implements Runnable
 
 			DataOutputStream clientOutput = new DataOutputStream(connectionSock.getOutputStream());
 
-			while (state<=10)
+			while (state<=11)
 			{
 					if (state == 0){
 						clientOutput.writeBytes("Please wait for other users to connect." + "\n");
@@ -89,10 +90,14 @@ public class JClientHandler implements Runnable
 					else if (state == 1){
 						clientOutput.writeBytes("01ENTERSTATE"+"\n");
 						clientOutput.writeBytes("Press [enter] to buzz in: "+"\n");
-						clientOutput.writeBytes(message + "\n");
+						questionVal = Integer.parseInt(message.substring(0,4));//message will = "0123Question will be here?"
+						clientOutput.writeBytes(message.substring(4) + "\n"); 	//Question will be here?
 						clientInput.readLine();
-						if (this.getState() == 1)
+
+						if (this.getState() == 1){
+							System.out.println(_senderName +" buzzed in first.");
 							state = 2;
+						}
 					}
 					else if (state == 2){
 
@@ -114,39 +119,48 @@ public class JClientHandler implements Runnable
 												clientOutput.writeBytes("01ENTERSTATE"+"\n"); //tells my client to enter a typing allowed state
                         clientOutput.writeBytes("Please enter a correct question: "+"\n");
                         this.answer = clientInput.readLine();
-                        if(this.checkAnswer()){
+                        if(this.checkAnswer()){ //my client answered correctly
 													for (socketAndName s : socksAndNames){ //change other client states
 														if (s.socket != connectionSock){
 																							DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
 																							otherClientStream.writeBytes(this._senderName+" answered correctly!"+"\n");
-																							otherClientStream.writeBytes("11ENTERSTATE"+"\n"); //tells client to go to exit state
+																							otherClientStream.writeBytes("00ENTERSTATE"+"\n"); //tells client to go to a nontyping state
 														}
 														else{
 															clientOutput.writeBytes("Congratulations, you answered correctly!"+"\n");
-															clientOutput.writeBytes("11ENTERSTATE"+"\n"); //tells client to go to exit state
+															System.out.println(_senderName+" answered correctly.");
+															clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells client to go to nontyping state
 														}
 													}
 												}
 
-                        else{
+                        else{//my client answered incorrectly
 													for (socketAndName s : socksAndNames){ //change other client states
 														if (s.socket != connectionSock){
 																							DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
 																							otherClientStream.writeBytes(this._senderName+" answered incorrectly!"+"\n");
-																							otherClientStream.writeBytes("11ENTERSTATE"+"\n"); //tells client to go to exit state
+																							otherClientStream.writeBytes("Their answer was: "+answer+"\n");
+																							otherClientStream.writeBytes("01ENTERSTATE"+"\n"); //tells client to go to a typing state
 														}
 														else{
 															clientOutput.writeBytes("WRONGGGGGG you answered incorrectly!"+"\n");
-															clientOutput.writeBytes("11ENTERSTATE"+"\n"); //tells client to go to exit state
+															System.out.println(_senderName+" answered incorrectly. They answered with: "+answer);
+															clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells my client to go to nontyping state
 														}
 													}
+
+													for (JClientHandler h :handlers){ //change other handler states accordingly
+														if (h!=this){
+															h.state = 1;
+														}
+													}
+													state =3; //change my handler state
                         }
-                        wait();
           }
-					else if (state == 3){
+					else if (state == 3){ //waiting state
 						wait();
 					}
-                    
+
 			}
 
 				  // Connection was lost
