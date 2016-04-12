@@ -40,7 +40,7 @@ public class JClientListener implements Runnable
 				if (serverText.substring(2).equals("ENTERSTATE")){ //enter state msg will look like '01ENTERSTATE' to enter state 1
 					String c_state_str = serverText.substring(0,2);
 					c_state = Integer.parseInt(c_state_str);
-					System.out.println("I entered state: "+c_state_str);
+					System.out.println("I entered (client) state: "+c_state_str);
 				}
 				else if (serverInput != null)
 				{
