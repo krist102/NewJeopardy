@@ -30,6 +30,7 @@ public class JClientHandler implements Runnable
 	public int score, questionVal;
 	private String message, answer, right_answer;
 	public boolean questionAttempted, questionPhase; //will be true when the user tries to answer a question
+	public JServer server;
 
 	JClientHandler(Socket sock, ArrayList<socketAndName> socksAndNames)
 	{
@@ -86,13 +87,19 @@ public class JClientHandler implements Runnable
 
 			while (state<=11)
 			{
+				System.out.println("state: "+state);
 				switch (state){
+					case -1:
+					wait();
+					break;
 					case 0:
 						clientOutput.writeBytes("Please wait for other users to connect." + "\n");
 						clientOutput.writeBytes("00ENTERSTATE"+"\n");
+						score = 0;
 						wait();
 						break;
 					case 1:
+					System.out.println("case 1: "+answer);
 						clientOutput.writeBytes("01ENTERSTATE"+"\n");
 						clientOutput.writeBytes("Press [enter] to buzz in: "+"\n");
 						questionVal = Integer.parseInt(message.substring(0,4)); //message will = "0123Question will be here?"
@@ -132,6 +139,7 @@ public class JClientHandler implements Runnable
                             clientOutput.writeBytes("Please enter the question: "+"\n");
                             this.answer = clientInput.readLine();
                                 if(this.checkAnswer()){ //my client answered correctly
+																	score += questionVal;
                                 for (socketAndName s : socksAndNames){ //change other client states
                                     if (s.socket != connectionSock){
                                         DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
@@ -144,9 +152,18 @@ public class JClientHandler implements Runnable
                                         clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells client to go to nontyping state
                                     }
                                 }
+
+																//change other handler states to start next question
+																for (JClientHandler h : handlers){
+																	h.global_buzz = 0;
+																	h.questionAttempted = false;
+																	h.questionPhase = false;
+																	h.state = 4;
+																}
                                 this.state = 4;
                             }
                             else{//my client answered incorrectly
+															score -= questionVal;
                                 for (socketAndName s : socksAndNames){ //change other client states
                                     if (s.socket != connectionSock){
                                         DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
@@ -174,6 +191,21 @@ public class JClientHandler implements Runnable
 					case 3: //waiting state
 						break;
 					case 4: //resetting questionAttempted / new question
+						for (JClientHandler h : handlers){
+							if (h.state != 4){
+								//do nothing someone hasnt answered
+							}
+							else{
+
+								Thread.sleep(1000);
+								for (JClientHandler hand: handlers){
+									if (hand!=this)hand.state =-1;
+								}
+								server.state++;
+								server.question_asked = true;
+								state = -1;
+							}
+						}
 						break;
                     case 9: // first
                         if(this.questionPhase){
@@ -201,6 +233,7 @@ public class JClientHandler implements Runnable
                         this.global_buzz = 1;
                         this.state = 9;
                         break;
+
 				}
 
 

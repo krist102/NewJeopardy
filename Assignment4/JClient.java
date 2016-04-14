@@ -68,6 +68,7 @@ public class JClient
 				switch (listener.c_state){
 					case 0://wait
 						//do nothing, do not ask for input
+						//keyboard.nextLine(); //gets stuff and throws it away;
 						break;
 					case 1://type stuff
 						String data = keyboard.nextLine();

@@ -36,7 +36,7 @@ public class JServer
 	private int clientNum;
 	private ArrayList<JClientHandler> handlers;
 	private static int coundownTime = 5;
-    private int state = 0;
+    public int state = 0;
     public boolean question_asked = true; // used to facilitate a new question
 	//private ArrayList<Thread> threads;
 
@@ -86,6 +86,7 @@ public class JServer
 				socksAndNames.add(new socketAndName(connectionSock,name));
 
 				JClientHandler handler = new JClientHandler(connectionSock, this.socksAndNames);
+				handler.server = this;
 				handlers.add(handler);
 				Thread theThread = new Thread(handler);
 				//threads.add(theThread);
@@ -128,12 +129,7 @@ public class JServer
 		}
 	}
     private synchronized void nextQuestion(){
-        for (JClientHandler h : handlers){
-            if(h.getState() == 4){
-                this.state++;
-                this.question_asked = true;
-            }
-        }
+//
     }
     private synchronized void setAnswer(String answer){
         for (JClientHandler h : handlers){
@@ -158,7 +154,9 @@ public class JServer
                     server.nextQuestion();
                     break;
                 case 1: // question 2
+									System.out.println("nextQuestion has been reached TMIMMMMMMMMMMMM");
                     if(server.question_asked){
+											System.out.println("HEREREEEEEEE");
                         server.question_asked = false;
                         server.setAnswer("What is 128?");
                         server.askQustion("An IPv6 address is this many bits long.","0200"); //a question and its value 100 in this case **make sure it is 4 characters wide
