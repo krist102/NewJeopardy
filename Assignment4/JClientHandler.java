@@ -28,7 +28,7 @@ public class JClientHandler implements Runnable
     public int buzz_num, global_buzz; // number that the client buzzed in as
 	public int state;
 	public int score, questionVal;
-	private String message, answer, right_answer;
+	public String message, answer, right_answer;
 	public boolean questionAttempted, questionPhase; //will be true when the user tries to answer a question
 	public JServer server;
 
