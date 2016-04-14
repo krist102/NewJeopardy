@@ -146,7 +146,6 @@ public class JClientHandler implements Runnable
                                 }
                                 this.state = 4;
                             }
-
                             else{//my client answered incorrectly
                                 for (socketAndName s : socksAndNames){ //change other client states
                                     if (s.socket != connectionSock){
@@ -173,18 +172,9 @@ public class JClientHandler implements Runnable
 						break; //end of state 2
 
 					case 3: //waiting state
-						clientOutput.writeBytes("My handler entered state: "+state + "\n");
-						while (state==3){
-							Thread.sleep(5);
-						}
 						break;
 					case 4: //resetting questionAttempted / new question
-                        clientOutput.writeBytes("My handler entered state: "+state + "\n");
-                        while (state==4){
-							Thread.sleep(5);
-						}
 						break;
-
                     case 9: // first
                         if(this.questionPhase){
                             if(this.buzz_num == this.global_buzz){ // go to question answering phase in order
