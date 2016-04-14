@@ -25,6 +25,7 @@ public class JClientHandler implements Runnable
 	private ArrayList<socketAndName> socksAndNames;
 	private ArrayList<JClientHandler> handlers;
 	private String _senderName;
+    public int buzz_num, global_buzz; // number that the client buzzed in as
 	public int state;
 	public int score, questionVal;
 	private String message, answer, right_answer;
@@ -34,7 +35,7 @@ public class JClientHandler implements Runnable
 	{
 		this.connectionSock = sock;
 		this.socksAndNames = socksAndNames;	// Keep reference to master list
-    this.state = 0;
+        this.state = 0;
 	}
 
 	public synchronized void setState(int s){
@@ -51,6 +52,8 @@ public class JClientHandler implements Runnable
   public boolean checkAnswer(){
       return this.answer.equalsIgnoreCase(this.right_answer);
   }
+    public int getbuzz_num(){return buzz_num;}
+    public void setbuzz_num(int num){this.buzz_num = num;}
 	private int getState(){return state;}
 
 	public String getName(){return _senderName;}
@@ -85,51 +88,29 @@ public class JClientHandler implements Runnable
 			{
 				switch (state){
 					case 0:
-						clientOutput.writeBytes("My handler entered state: "+state + "\n");
 						clientOutput.writeBytes("Please wait for other users to connect." + "\n");
 						clientOutput.writeBytes("00ENTERSTATE"+"\n");
 						wait();
 						break;
 					case 1:
-
-						clientOutput.writeBytes("My handler entered state: "+state + "\n");
 						clientOutput.writeBytes("01ENTERSTATE"+"\n");
-						if (questionAttempted){state = 3; break;}//jumps to waiting state if user already answered this question
+						//if (questionAttempted){state = 3; break;}//jumps to waiting state if user already answered this question
 						clientOutput.writeBytes("Press [enter] to buzz in: "+"\n");
-						questionVal = Integer.parseInt(message.substring(0,4));//message will = "0123Question will be here?"
+						questionVal = Integer.parseInt(message.substring(0,4)); //message will = "0123Question will be here?"
 						clientOutput.writeBytes(message.substring(4) + "\n"); 	//Question will be here?
-
 						clientInput.readLine();
-						if (state == 3){ //someone else has already buzzed in.
-							break;
-						}
 						questionAttempted = true;
-						for (JClientHandler h : handlers){ //change other handler states
-								if (h!=this){
-									h.state = 3; //waiting state
-								}
-						}
-						if (this.getState() == 1){
-							System.out.println(_senderName +" buzzed in first.");
-							state = 2;
-						}
+						this.state = 10;
 						break;
 					case 2:
-						clientOutput.writeBytes("My handler entered state: "+state + "\n");
 						for (socketAndName s : socksAndNames){ //change other client states
 							if (s.socket != connectionSock){
-																DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
-																otherClientStream.writeBytes("00ENTERSTATE"+"\n"); //tells client to enter a waiting state (no typing)
+                                DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
+                                otherClientStream.writeBytes("00ENTERSTATE"+"\n"); //tells client to enter a waiting state (no typing)
                                 otherClientStream.writeBytes("Someone else buzzed in first."+"\n");
                                 otherClientStream.writeBytes(this._senderName + " is typing an answer, please wait... (And hope that they're wrong)"+"\n");
 							}
 						}
-						for (JClientHandler h : handlers){ //change other handler states
-							if (h!=this){
-								h.state = 3; //waiting state
-							}
-						}
-
 						clientOutput.writeBytes("01ENTERSTATE"+"\n"); //tells my client to enter a typing allowed state
 						clientOutput.writeBytes("Please enter a correct question: "+"\n");
 						this.answer = clientInput.readLine();
@@ -137,8 +118,8 @@ public class JClientHandler implements Runnable
 							for (socketAndName s : socksAndNames){ //change other client states
 								if (s.socket != connectionSock){
 									DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
-									otherClientStream.writeBytes(this._senderName+" answered correctly!"+"\n");
-									otherClientStream.writeBytes("00ENTERSTATE"+"\n"); //tells client to go to a nontyping state
+									otherClientStream.writeBytes(this._senderName + " answered correctly!" + "\n");
+									otherClientStream.writeBytes("00ENTERSTATE" + "\n"); //tells client to go to a nontyping state
 								}
 								else{
 									clientOutput.writeBytes("Congratulations, you answered correctly!"+"\n");
@@ -162,13 +143,10 @@ public class JClientHandler implements Runnable
 									clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells my client to go to nontyping state
 								}
 							}
-
-							for (JClientHandler h :handlers){ //change other handler states accordingly
-								if (h!=this){
-									h.state = 1;
-								}
-							}
-							state =3; //change my handler state
+                            for (JClientHandler h : handlers){
+                                h.global_buzz++; // allows next client to answer the question
+                            }
+							state = 3; //change my handler state
 						}
 						break; //end of state 2
 
@@ -180,8 +158,26 @@ public class JClientHandler implements Runnable
 						break;
 					case 4: //resetting questionAttempted / new question
 						questionAttempted = false;
-						state = 1;
 						break;
+
+                    case 9: // first
+                        if(this.buzz_num == this.global_buzz){ // go to question answering phase in order
+                            this.state = 2;
+                        }
+                        break;
+                    case 10: // handles the number in which people buzz in
+                        int n = 3;
+                        for (JClientHandler h : handlers){
+							if (h!=this){
+								if(h.buzz_num == -1){
+                                    n--;
+                                }
+							}
+						}
+                        this.buzz_num = n;
+                        this.global_buzz = 1;
+                        this.state = 9;
+                        break;
 				}
 
 

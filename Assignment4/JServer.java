@@ -36,10 +36,12 @@ public class JServer
 	private int clientNum;
 	private ArrayList<JClientHandler> handlers;
 	private static int coundownTime = 5;
+    private int state;
 	//private ArrayList<Thread> threads;
 
 	public JServer()
 	{
+        this.state = 0;
 		socksAndNames = new ArrayList<socketAndName>();
 		handlers= new ArrayList<JClientHandler>();
 		//threads= new ArrayList<Thread>();
@@ -116,7 +118,7 @@ public class JServer
 	private synchronized void askQustion(String question, String value){
 		for (JClientHandler h : handlers){
 			h.setHandlers(handlers); //makes sure all handlers have up to date handler lists
-
+            h.setbuzz_num(-1);
 			h.setMessage(value+question); //asks question
 			h.setState(1);
 
@@ -136,7 +138,24 @@ public class JServer
 		JServer server = new JServer();
 		server.getConnection();
 		server.printConnections();
-    server.setAnswer("What is the Three Way Handshake?");
-		server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+        question_asked = true; // used to facilitate a new question
+        while(true){
+            switch(state){
+                0:
+                    if(question_asked){
+                        question_asked = false;
+                        server.setAnswer("What is the Three Way Handshake?");
+                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                    }
+                    default;
+                default:
+                    for (JClientHandler h : handlers){
+                        if(h.getState() == 4){
+                            this.state++;
+                            question_asked = true;
+                        }
+                    }
+            }
+        }
 	}
 } // JServer
