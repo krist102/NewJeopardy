@@ -121,7 +121,7 @@ public class JServer
 			h.setHandlers(handlers); //makes sure all handlers have up to date handler lists
             h.setbuzz_num(-1);
             h.questionPhase = false;
-			h.setMessage(value+question); //asks question
+			h.message = value+question; //asks question
 			h.state = 1;
 
 			//wait for response
@@ -133,7 +133,7 @@ public class JServer
     }
     private synchronized void setAnswer(String answer){
         for (JClientHandler h : handlers){
-			h.setAnswer(answer);
+			h.answer = answer;
 		}
   }
 
