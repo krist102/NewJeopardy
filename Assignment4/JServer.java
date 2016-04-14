@@ -159,6 +159,7 @@ public class JServer
                     break;
                 case 1: // question 2
                     if(server.question_asked){
+                        System.out.println("HERE");
                         server.question_asked = false;
                         server.setAnswer("What is the Three Way Handshake?");
                         server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide

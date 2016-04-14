@@ -94,7 +94,6 @@ public class JClientHandler implements Runnable
 						break;
 					case 1:
 						clientOutput.writeBytes("01ENTERSTATE"+"\n");
-						//if (questionAttempted){state = 3; break;}//jumps to waiting state if user already answered this question
 						clientOutput.writeBytes("Press [enter] to buzz in: "+"\n");
 						questionVal = Integer.parseInt(message.substring(0,4)); //message will = "0123Question will be here?"
 						clientOutput.writeBytes(message.substring(4) + "\n"); 	//Question will be here?
@@ -110,46 +109,67 @@ public class JClientHandler implements Runnable
 							}
 						}
 						clientOutput.writeBytes("01ENTERSTATE"+"\n"); //tells my client to enter a typing allowed state
-						clientOutput.writeBytes("Please enter a correct question: "+"\n");
+						clientOutput.writeBytes("Do you still want to answer the question? (y/n): "+"\n");
 						this.answer = clientInput.readLine();
-						if(this.checkAnswer()){ //my client answered correctly
-							for (socketAndName s : socksAndNames){ //change other client states
+                        System.out.println(this.answer);
+                        if(this.answer.equals("n")){
+                            for (socketAndName s : socksAndNames){ //change other client states
 								if (s.socket != connectionSock){
 									DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
-									otherClientStream.writeBytes(this._senderName + " answered correctly!" + "\n");
-									otherClientStream.writeBytes("00ENTERSTATE" + "\n"); //tells client to go to a nontyping state
-								}
-								else{
-									clientOutput.writeBytes("Congratulations, you answered correctly!"+"\n");
-									System.out.println(_senderName+" answered correctly.");
-									clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells client to go to nontyping state
-								}
-							}
-                            this.state = 4;
-						}
-
-						else{//my client answered incorrectly
-							for (socketAndName s : socksAndNames){ //change other client states
-								if (s.socket != connectionSock){
-									DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
-									otherClientStream.writeBytes(this._senderName+" answered incorrectly!"+"\n");
-									otherClientStream.writeBytes("Their answer was: "+answer+"\n");
+									otherClientStream.writeBytes(this._senderName+" passed!"+"\n");
 									otherClientStream.writeBytes("01ENTERSTATE"+"\n"); //tells client to go to a typing state
-								}
-								else{
-									clientOutput.writeBytes("WRONGGGGGG you answered incorrectly!"+"\n");
-									System.out.println(_senderName+" answered incorrectly. They answered with: "+answer);
-									clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells my client to go to nontyping state
 								}
 							}
                             state = 3; //change my handler state
-                            for (JClientHandler h : handlers){
-                                h.global_buzz++; // allows next client to answer the question
-                                if(h.global_buzz == 4){
-                                    state = 4;
+                                for (JClientHandler h : handlers){
+                                    h.global_buzz++; // allows next client to answer the question
+                                    if(h.global_buzz == 4){
+                                        state = 4;
+                                    }
+                                }
+                        }
+                        else{
+                            clientOutput.writeBytes("Please enter the question: "+"\n");
+                            this.answer = clientInput.readLine();
+                                if(this.checkAnswer()){ //my client answered correctly
+                                for (socketAndName s : socksAndNames){ //change other client states
+                                    if (s.socket != connectionSock){
+                                        DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
+                                        otherClientStream.writeBytes(this._senderName + " answered correctly!" + "\n");
+                                        otherClientStream.writeBytes("00ENTERSTATE" + "\n"); //tells client to go to a nontyping state
+                                    }
+                                    else{
+                                        clientOutput.writeBytes("Congratulations, you answered correctly!"+"\n");
+                                        System.out.println(_senderName+" answered correctly.");
+                                        clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells client to go to nontyping state
+                                    }
+                                }
+                                this.state = 4;
+                            }
+
+                            else{//my client answered incorrectly
+                                for (socketAndName s : socksAndNames){ //change other client states
+                                    if (s.socket != connectionSock){
+                                        DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
+                                        otherClientStream.writeBytes(this._senderName+" answered incorrectly!"+"\n");
+                                        otherClientStream.writeBytes("Their answer was: "+answer+"\n");
+                                        otherClientStream.writeBytes("01ENTERSTATE"+"\n"); //tells client to go to a typing state
+                                    }
+                                    else{
+                                        clientOutput.writeBytes("WRONGGGGGG you answered incorrectly!"+"\n");
+                                        System.out.println(_senderName+" answered incorrectly. They answered with: "+answer);
+                                        clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells my client to go to nontyping state
+                                    }
+                                }
+                                state = 3; //change my handler state
+                                for (JClientHandler h : handlers){
+                                    h.global_buzz++; // allows next client to answer the question
+                                    if(h.global_buzz == 4){
+                                        state = 4;
+                                    }
                                 }
                             }
-						}
+                        }
 						break; //end of state 2
 
 					case 3: //waiting state
