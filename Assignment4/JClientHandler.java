@@ -29,7 +29,7 @@ public class JClientHandler implements Runnable
 	public int state;
 	public int score, questionVal;
 	private String message, answer, right_answer;
-	public boolean questionAttempted; //will be true when the user tries to answer a question
+	public boolean questionAttempted, questionPhase; //will be true when the user tries to answer a question
 
 	JClientHandler(Socket sock, ArrayList<socketAndName> socksAndNames)
 	{
@@ -106,9 +106,7 @@ public class JClientHandler implements Runnable
 						for (socketAndName s : socksAndNames){ //change other client states
 							if (s.socket != connectionSock){
                                 DataOutputStream otherClientStream = new DataOutputStream(s.socket.getOutputStream());
-                                otherClientStream.writeBytes("00ENTERSTATE"+"\n"); //tells client to enter a waiting state (no typing)
-                                otherClientStream.writeBytes("Someone else buzzed in first."+"\n");
-                                otherClientStream.writeBytes(this._senderName + " is typing an answer, please wait... (And hope that they're wrong)"+"\n");
+                                otherClientStream.writeBytes(this._senderName + " is typing an answer, please wait... (And hope that they're wrong!)"+"\n");
 							}
 						}
 						clientOutput.writeBytes("01ENTERSTATE"+"\n"); //tells my client to enter a typing allowed state
@@ -127,6 +125,7 @@ public class JClientHandler implements Runnable
 									clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells client to go to nontyping state
 								}
 							}
+                            this.state = 4;
 						}
 
 						else{//my client answered incorrectly
@@ -143,10 +142,13 @@ public class JClientHandler implements Runnable
 									clientOutput.writeBytes("00ENTERSTATE"+"\n"); //tells my client to go to nontyping state
 								}
 							}
+                            state = 3; //change my handler state
                             for (JClientHandler h : handlers){
                                 h.global_buzz++; // allows next client to answer the question
+                                if(h.global_buzz == 4){
+                                    state = 4;
+                                }
                             }
-							state = 3; //change my handler state
 						}
 						break; //end of state 2
 
@@ -157,12 +159,17 @@ public class JClientHandler implements Runnable
 						}
 						break;
 					case 4: //resetting questionAttempted / new question
-						questionAttempted = false;
+                        clientOutput.writeBytes("My handler entered state: "+state + "\n");
+                        while (state==4){
+							Thread.sleep(5);
+						}
 						break;
 
                     case 9: // first
-                        if(this.buzz_num == this.global_buzz){ // go to question answering phase in order
-                            this.state = 2;
+                        if(this.questionPhase){
+                            if(this.buzz_num == this.global_buzz){ // go to question answering phase in order
+                                this.state = 2;
+                            }
                         }
                         break;
                     case 10: // handles the number in which people buzz in
@@ -174,7 +181,13 @@ public class JClientHandler implements Runnable
                                 }
 							}
 						}
+                        clientOutput.writeBytes("You buzzed in! You are #"+n+"! (Please wait until the others buzz in)\n");
                         this.buzz_num = n;
+                        if(this.buzz_num == 3){
+                            for (JClientHandler h : handlers){
+							    h.questionPhase = true;
+						}
+                        }
                         this.global_buzz = 1;
                         this.state = 9;
                         break;

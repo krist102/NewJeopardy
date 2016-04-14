@@ -119,6 +119,7 @@ public class JServer
 		for (JClientHandler h : handlers){
 			h.setHandlers(handlers); //makes sure all handlers have up to date handler lists
             h.setbuzz_num(-1);
+            h.questionPhase = false;
 			h.setMessage(value+question); //asks question
 			h.setState(1);
 
@@ -148,14 +149,48 @@ public class JServer
 		server.printConnections();
         while(true){
             switch(server.state){
-                case 0:
+                case 0: // question 1
                     if(server.question_asked){
                         server.question_asked = false;
                         server.setAnswer("What is the Three Way Handshake?");
                         server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
                     }
-                default:
                     server.nextQuestion();
+                    break;
+                case 1: // question 2
+                    if(server.question_asked){
+                        server.question_asked = false;
+                        server.setAnswer("What is the Three Way Handshake?");
+                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                    }
+                    server.nextQuestion();
+                    break;
+                case 2: // question 3
+                    if(server.question_asked){
+                        server.question_asked = false;
+                        server.setAnswer("What is the Three Way Handshake?");
+                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                    }
+                    server.nextQuestion();
+                    break;
+                case 3: // question 4
+                    if(server.question_asked){
+                        server.question_asked = false;
+                        server.setAnswer("What is the Three Way Handshake?");
+                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                    }
+                    server.nextQuestion();
+                    break;
+                case 4: // question 5
+                    if(server.question_asked){
+                        server.question_asked = false;
+                        server.setAnswer("What is the Three Way Handshake?");
+                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                    }
+                    server.nextQuestion();
+                    break;
+                default:
+                    break;
             }
         }
 	}
