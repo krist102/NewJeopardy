@@ -36,12 +36,12 @@ public class JServer
 	private int clientNum;
 	private ArrayList<JClientHandler> handlers;
 	private static int coundownTime = 5;
-    private int state;
+    private int state = 0;
+    public boolean question_asked = true; // used to facilitate a new question
 	//private ArrayList<Thread> threads;
 
 	public JServer()
 	{
-        this.state = 0;
 		socksAndNames = new ArrayList<socketAndName>();
 		handlers= new ArrayList<JClientHandler>();
 		//threads= new ArrayList<Thread>();
@@ -126,6 +126,14 @@ public class JServer
 			//ClientHandler will print out who buzzes in first
 		}
 	}
+    private synchronized void nextQuestion(){
+        for (JClientHandler h : handlers){
+            if(h.getState() == 4){
+                this.state++;
+                this.question_asked = true;
+            }
+        }
+    }
     private synchronized void setAnswer(String answer){
         for (JClientHandler h : handlers){
 			h.setAnswer(answer);
@@ -138,23 +146,16 @@ public class JServer
 		JServer server = new JServer();
 		server.getConnection();
 		server.printConnections();
-        question_asked = true; // used to facilitate a new question
         while(true){
-            switch(state){
-                0:
-                    if(question_asked){
-                        question_asked = false;
+            switch(server.state){
+                case 0:
+                    if(server.question_asked){
+                        server.question_asked = false;
                         server.setAnswer("What is the Three Way Handshake?");
                         server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
                     }
-                    default;
                 default:
-                    for (JClientHandler h : handlers){
-                        if(h.getState() == 4){
-                            this.state++;
-                            question_asked = true;
-                        }
-                    }
+                    server.nextQuestion();
             }
         }
 	}

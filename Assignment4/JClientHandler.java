@@ -54,7 +54,7 @@ public class JClientHandler implements Runnable
   }
     public int getbuzz_num(){return buzz_num;}
     public void setbuzz_num(int num){this.buzz_num = num;}
-	private int getState(){return state;}
+	public int getState(){return state;}
 
 	public String getName(){return _senderName;}
 
