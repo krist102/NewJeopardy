@@ -160,32 +160,32 @@ public class JServer
                 case 1: // question 2
                     if(server.question_asked){
                         server.question_asked = false;
-                        server.setAnswer("What is the Three Way Handshake?");
-                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                        server.setAnswer("What is 128?");
+                        server.askQustion("An IPv6 address is this many bits long.","0200"); //a question and its value 100 in this case **make sure it is 4 characters wide
                     }
                     server.nextQuestion();
                     break;
                 case 2: // question 3
                     if(server.question_asked){
                         server.question_asked = false;
-                        server.setAnswer("What is the Three Way Handshake?");
-                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                        server.setAnswer("What is 16?");
+                        server.askQustion("A port number is this many bits long.","0300"); //a question and its value 100 in this case **make sure it is 4 characters wide
                     }
                     server.nextQuestion();
                     break;
                 case 3: // question 4
                     if(server.question_asked){
                         server.question_asked = false;
-                        server.setAnswer("What is the Three Way Handshake?");
-                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                        server.setAnswer("What is propogation delay?");
+                        server.askQustion("Distance to propagation speed.","0400"); //a question and its value 100 in this case **make sure it is 4 characters wide
                     }
                     server.nextQuestion();
                     break;
                 case 4: // question 5
                     if(server.question_asked){
                         server.question_asked = false;
-                        server.setAnswer("What is the Three Way Handshake?");
-                        server.askQustion("The process for establishing a TCP connection.","0100"); //a question and its value 100 in this case **make sure it is 4 characters wide
+                        server.setAnswer("What is UDP?");
+                        server.askQustion("RIP uses the service of this protocol.","0500"); //a question and its value 100 in this case **make sure it is 4 characters wide
                     }
                     server.nextQuestion();
                     break;
