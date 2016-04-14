@@ -122,7 +122,7 @@ public class JServer
             h.setbuzz_num(-1);
             h.questionPhase = false;
 			h.setMessage(value+question); //asks question
-			h.setState(1);
+			h.state = 1;
 
 			//wait for response
 			//ClientHandler will print out who buzzes in first
